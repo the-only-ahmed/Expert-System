@@ -3,14 +3,15 @@ import lexer
 OP = 'operator'
 NOT = 'Not'
 PAR = 'Parenthesis'
-THEN = 'Implication'
+IMP = 'Implication'
+IFOF = 'If and only if'
 FACT = 'Fact'
 QUR = 'Query'
 VAR = 'Variable'
 
 token_exprs = [
-    (r'\<=>', THEN),
-    (r'\=>', THEN),
+    (r'\<=>', IFOF),
+    (r'\=>', IMP),
     (r'\?', QUR),
     (r'\=', FACT),
     (r'\(', PAR),
@@ -26,7 +27,7 @@ def imp_lex(characters):
     return lexer.lex(characters, token_exprs)
 
 rules = []
-queries = []
+queries = {}
 variables = {}
 
 def checkSides(sideLst):
@@ -75,9 +76,9 @@ def checkSides(sideLst):
     return True
 
 def parse_RulesError(lex):
-    if len([item for item in lex if item[1] == THEN]) != 1:
+    if len([item for item in lex if item[1] in [IMP, IFOF]]) != 1:
         return False
-    if lex[0][1] == THEN or lex[-1][1] == THEN:
+    if lex[0][1] in [IMP, IFOF] or lex[-1][1] in [IMP, IFOF]:
         return False
 
     leftSide = []
@@ -86,10 +87,10 @@ def parse_RulesError(lex):
     for item in lex:
         if item[1] == VAR:
             if item[0] not in variables:
-                variables[item[0]] = False
+                variables[item[0]] = None
         if item[1] in [QUR, FACT]:
             return False
-        if item[1] == THEN:
+        if item[1] in [IMP, IFOF]:
             isImp = True
         elif not isImp:
             leftSide.append(item)
@@ -108,13 +109,14 @@ def parse_Error(lex, State):
         return False
     wrong_var = [item for item in lex if item[1] == VAR and item[0] not in variables.keys()]
     if len(wrong_var) > 0:
-        print "Variables : " + wrong_var + " doesn't exist"
+        print "Variables : " + str(wrong_var) + " doesn't exist"
         return False
     return True
 
 def parse_file(fd):
     t_list = fd.read().splitlines()
     facts = []
+    reqQueries = []
 
     for i, lines in enumerate(t_list):
         tmp = lines.strip().split("#")
@@ -124,7 +126,7 @@ def parse_file(fd):
             cmd = cmd.replace("\t", "")
             lexedLst = imp_lex(cmd)
             if (lexedLst[0][1] == FACT):
-                if len(queries) > 0:
+                if len(reqQueries) > 0:
                     print "Parse error in Facts: Facts must always between the Rules and the Queries"
                     print "error line: " + lines
                     exit()
@@ -138,20 +140,28 @@ def parse_file(fd):
                     exit()
                 if not parse_Error(lexedLst, QUR):
                     print "Parse error in Queries: " + lines
-                queries.append(lexedLst)
+                reqQueries.append(lexedLst)
             else:
-                if len(facts) > 0 or len(queries) > 0:
+                if len(facts) > 0 or len(reqQueries) > 0:
                     print "Parse error in Rules: Rules must always be in the top of the file"
                     print "error line: " + lines
                     exit()
                 if not parse_RulesError(lexedLst):
                     print "Parse error in Rules: " + lines
                     exit()
-                rules.append(cmd)
+                rules.append(lexedLst)
     setFacts(facts)
+    parseQuery(reqQueries)
 
 def setFacts(facts):
     for fact in facts:
         for f in fact:
             if f[1] == VAR:
                 variables[f[0]] = True
+
+def parseQuery(reqQueries):
+    for Query in reqQueries:
+        for q in Query:
+            if q[1] == 'Variable':
+                queries[q[0]] = None
+    return queries
