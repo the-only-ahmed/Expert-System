@@ -26,9 +26,8 @@ def imp_lex(characters):
     return lexer.lex(characters, token_exprs)
 
 rules = []
-facts = []
 queries = []
-variables = []
+variables = {}
 
 def checkSides(sideLst):
     OpNb = len([item for item in sideLst if item[1] == OP]) + 1
@@ -87,7 +86,7 @@ def parse_RulesError(lex):
     for item in lex:
         if item[1] == VAR:
             if item[0] not in variables:
-                variables.append(item[0])
+                variables[item[0]] = False
         if item[1] in [QUR, FACT]:
             return False
         if item[1] == THEN:
@@ -104,7 +103,10 @@ def parse_Error(lex, State):
         return False
     if len([item for item in lex if item[1] not in [State, VAR]]) != 0:
         return False
-    wrong_var = [item for item in lex if item[1] == VAR and item[0] not in variables]
+    var = [item for item in lex if item[1] == VAR]
+    if len(var) != len(set(var)):
+        return False
+    wrong_var = [item for item in lex if item[1] == VAR and item[0] not in variables.keys()]
     if len(wrong_var) > 0:
         print "Variables : " + wrong_var + " doesn't exist"
         return False
@@ -112,6 +114,7 @@ def parse_Error(lex, State):
 
 def parse_file(fd):
     t_list = fd.read().splitlines()
+    facts = []
 
     for i, lines in enumerate(t_list):
         tmp = lines.strip().split("#")
@@ -145,4 +148,10 @@ def parse_file(fd):
                     print "Parse error in Rules: " + lines
                     exit()
                 rules.append(cmd)
-    # print rules
+    setFacts(facts)
+
+def setFacts(facts):
+    for fact in facts:
+        for f in fact:
+            if f[1] == VAR:
+                variables[f[0]] = True

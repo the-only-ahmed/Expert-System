@@ -4,6 +4,7 @@ import os.path
 import sys
 import argparse
 from parser import *
+from solution import solve
 
 def check_fileExistance(path):
     if os.path.isfile(path):
@@ -12,12 +13,10 @@ def check_fileExistance(path):
             return fd
         else:
             print("File can't be opened")
-            logger.log("File can't be opened")
-            return
+            exit()
     else:
         print("File doesn't exist")
-        logger.log("File doesn't exist")
-        return
+        exit()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -32,5 +31,7 @@ def main():
         exit()
     if fd is not None:
         parse_file(fd)
+
+    solve(variables, rules, queries)
 
 main()
