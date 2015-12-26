@@ -109,8 +109,10 @@ def parse_Error(lex, State):
         return False
     wrong_var = [item for item in lex if item[1] == VAR and item[0] not in variables.keys()]
     if len(wrong_var) > 0:
-        print "Variables : " + str(wrong_var) + " doesn't exist"
-        return False
+        # print "Variables : " + str(wrong_var) + " doesn't exist"
+        # return False
+        for wrong in wrong_var:
+            variables[wrong[0]] = False
     return True
 
 def parse_file(fd):
@@ -140,6 +142,7 @@ def parse_file(fd):
                     exit()
                 if not parse_Error(lexedLst, QUR):
                     print "Parse error in Queries: " + lines
+                    exit()
                 reqQueries.append(lexedLst)
             else:
                 if len(facts) > 0 or len(reqQueries) > 0:
