@@ -166,5 +166,5 @@ def parseQuery(reqQueries):
     for Query in reqQueries:
         for q in Query:
             if q[1] == 'Variable':
-                queries[q[0]] = None
+                queries[q[0]] = []
     return queries

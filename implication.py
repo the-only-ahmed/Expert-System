@@ -1,5 +1,7 @@
 from parser import *
 
+ahmed = [('E', 'Variable'), ('+', 'operator'), ('F', 'Variable')]
+
 def solveRule(rule, essai):
     isImp = False
     leftSide = []
@@ -15,27 +17,33 @@ def solveRule(rule, essai):
 
     left = solveSide(leftSide)
     if left is None:
-        global variables
-        tmp = dict(variables)
-        leftVars = [item[0] for item in leftSide if item[1] == VAR]
-        for v in leftVars:
-            if variables[v] is None:
-                variables[v] = False
-        left = solveSide(leftSide)
-        variables = dict(tmp)
-        if left is None:
-            return None
+        if essai == 1:
+            global variables
+            tmp = dict(variables)
+            leftVars = [item[0] for item in leftSide if item[1] == VAR]
+            for v in leftVars:
+                if variables[v] is None:
+                    variables[v] = False
+            left = solveSide(leftSide)
+            variables = dict(tmp)
+            if left is None:
+                return False
+        else:
+            return False
     if setOtherSide(rightSide, left, essai) is None:
         return False
+    print str(leftSide) + " => " + str(left)
     return True
 
 def setOtherSide(sideLst, left, essai):
     unknownLst = [item for item in sideLst if item[1] == VAR and variables[item[0]] == None]
     if len(unknownLst) == 1:
         unknown = unknownLst[0][0]
-        variables[unknown] = solveSide(sideLst, left)
+        val = solveSide(sideLst, left)
         if unknown in queries:
-            queries[unknown] = variables[unknown]
+            queries[unknown].append(val)
+        else:
+            variables[unknown] = val
         return True
     elif essai == 0:
         return None
@@ -55,9 +63,10 @@ def setOtherSide(sideLst, left, essai):
                 v = True
                 if uk[0] in notLst:
                     v = False
-                variables[uk[0]] = v
                 if uk[0] in queries:
-                    queries[uk[0]] = v
+                    queries[uk[0]].append(v)
+                else:
+                    variables[uk[0]] = v
         else:
             return None
 
