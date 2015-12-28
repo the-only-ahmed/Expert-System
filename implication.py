@@ -16,9 +16,12 @@ def solveRule(rule, essai):
             rightSide.append(item)
 
     left = solveSide(leftSide)
+    global variables
+    print "\033[92m" + str(variables) + "\033[0m"
+    print "\033[91m" + str(leftSide) + " => " + "\033[95m" + str(left) + "\033[0m"
     if left is None:
         if essai == 1:
-            global variables
+            #global variables
             tmp = dict(variables)
             leftVars = [item[0] for item in leftSide if item[1] == VAR]
             for v in leftVars:
@@ -41,8 +44,8 @@ def setOtherSide(sideLst, left):
         val = solveSide(sideLst, left)
         if unknown in queries:
             queries[unknown].append(val)
-        else:
-            variables[unknown] = val
+        #else:
+        variables[unknown] = val
         return True
     else:
         if left is True:
@@ -62,8 +65,8 @@ def setOtherSide(sideLst, left):
                     v = False
                 if uk[0] in queries:
                     queries[uk[0]].append(v)
-                else:
-                    variables[uk[0]] = v
+                #else:
+                variables[uk[0]] = v
             return True
         else:
             return None
@@ -96,11 +99,11 @@ def solveSide(*args):
                     subCalc = solveSide(parLst)
                     ignore = len(parLst) + 1
                     if op == '+':
-                        res = bool(res and subCalc)
+                        res = res and subCalc
                     elif op == '|':
-                        res = bool(res | subCalc)
+                        res = res or subCalc
                     elif op == '^':
-                        res = bool(res ^ subCalc)
+                        res = res ^ subCalc
                     else:
                         res = subCalc
                 elif item[1] == NOT:
@@ -116,11 +119,11 @@ def solveSide(*args):
                         v = not v
                         no = False
                     if op == '+':
-                        res = bool(res and v)
+                        res = res and v
                     elif op == '|':
-                        res = bool(res + v)
+                        res = res or v
                     elif op == '^':
-                        res = bool(res ^ v)
+                        res = res ^ v
                     else:
                         res = v
                 pos += 1
