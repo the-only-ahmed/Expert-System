@@ -1,7 +1,7 @@
 from parser import *
 from implication import *
 
-def solveIfof(rule, essai):
+def solveIfof(rule):
     isImp = False
     leftSide = []
     rightSide = []
@@ -19,10 +19,10 @@ def solveIfof(rule, essai):
     if left is None and right is None:
         return None
     elif left is None and right is not None:
-        if setOtherSide(leftSide, right, essai) is None:
+        if setOtherSide(leftSide, right) is None:
             return False
     elif left is not None and right is None:
-        if setOtherSide(rightSide, left, essai) is None:
+        if setOtherSide(rightSide, left) is None:
             return False
     return True
 

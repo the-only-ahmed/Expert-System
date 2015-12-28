@@ -134,6 +134,7 @@ def parse_file(fd):
                     exit()
                 if not parse_Error(lexedLst, FACT):
                     print "Parse error in Facts: " + lines
+                    exit()
                 facts.append(lexedLst)
             elif (lexedLst[0][1] == QUR):
                 if len(facts) == 0:

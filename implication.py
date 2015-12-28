@@ -30,12 +30,11 @@ def solveRule(rule, essai):
                 return False
         else:
             return False
-    if setOtherSide(rightSide, left, essai) is None:
+    if setOtherSide(rightSide, left) is None:
         return False
-    print str(leftSide) + " => " + str(left)
     return True
 
-def setOtherSide(sideLst, left, essai):
+def setOtherSide(sideLst, left):
     unknownLst = [item for item in sideLst if item[1] == VAR and variables[item[0]] == None]
     if len(unknownLst) == 1:
         unknown = unknownLst[0][0]
@@ -45,8 +44,6 @@ def setOtherSide(sideLst, left, essai):
         else:
             variables[unknown] = val
         return True
-    elif essai == 0:
-        return None
     else:
         if left is True:
             notLst = []
@@ -67,6 +64,7 @@ def setOtherSide(sideLst, left, essai):
                     queries[uk[0]].append(v)
                 else:
                     variables[uk[0]] = v
+            return True
         else:
             return None
 
@@ -98,11 +96,11 @@ def solveSide(*args):
                     subCalc = solveSide(parLst)
                     ignore = len(parLst) + 1
                     if op == '+':
-                        res = res and subCalc
+                        res = bool(res and subCalc)
                     elif op == '|':
-                        res = res or subCalc
+                        res = bool(res | subCalc)
                     elif op == '^':
-                        res = res ^ subCalc
+                        res = bool(res ^ subCalc)
                     else:
                         res = subCalc
                 elif item[1] == NOT:
@@ -118,11 +116,11 @@ def solveSide(*args):
                         v = not v
                         no = False
                     if op == '+':
-                        res = res and v
+                        res = bool(res and v)
                     elif op == '|':
-                        res = res or v
+                        res = bool(res + v)
                     elif op == '^':
-                        res = res ^ v
+                        res = bool(res ^ v)
                     else:
                         res = v
                 pos += 1

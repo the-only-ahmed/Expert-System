@@ -6,23 +6,21 @@ def solve(variables, rules, queries):
     ln = len(rules)
     essai = 0
 
-    # setVariables()
-    # print variables
     for q in queries:
         if variables[q] is not None:
             queries[q].append(variables[q])
-    while len(rules) > 0:#  and checkQuery():
+    while len(rules) > 0:
         delete = []
+        rules = reorganize(rules)
         for rule in rules:
             if len([item for item in rule if item[1] == IMP]) > 0:
                 if solveRule(rule, essai):
-                    # print "rule to remove : " + str(rule)
                     delete.append(rule)
-                    # rules.remove(rule)
+                    essai = 0
             elif len([item for item in rule if item[1] == IFOF]) > 0:
-                if solveIfof(rule, essai):
+                if solveIfof(rule):
+                    essai = 0
                     delete.append(rule)
-                    # rules.remove(rule)
             else:
                 print IFOF + " is currently not available"
                 exit()
@@ -36,19 +34,46 @@ def solve(variables, rules, queries):
         elif essai > 0:
             essai = 0
         ln = len(rules)
-    # print variables
     # # for q in queries:
     # #     if queries[q] is None:
     # #         queries[q] = [False]
+    queries = setQueries()
+    # queries = checkQuery()
     print queries
 
-def checkQuery():
+def setQueries():
+    result = {}
     for q in queries:
-        if queries[q] is None:
-            return True
-    return False
+        result[q] = queries[q][0]
+    return result
 
-def setVariables():
-    for v in variables:
-        if variables[v] is None and v not in queries:
-            variables[v] = False
+def checkQuery():
+    result = {}
+    for q in queries:
+        if len(list(set(queries[q]))) > 1 or len(queries[q]) == 0:
+            result[q] = None
+        else:
+            result[q] = queries[q][0]
+    return result
+
+def getPerc(rule):
+    leftSide = []
+    for item in rule:
+        if item[1] in [IMP, IFOF]:
+            break
+        else:
+            leftSide.append(item)
+    leftVars = [item for item in leftSide if item[1] == VAR]
+    known = len([item for item in leftVars if variables[item[0]] is not None])
+
+    return (known * 100) / len(leftVars)
+
+def reorganize(rules):
+    rl = []
+    for rule in rules:
+        rl.append((rule, getPerc(rule)))
+    rl = sorted(rl, key=lambda x: x[1], reverse=True)
+    rules = []
+    for rule in rl:
+        rules.append(rule[0])
+    return rules
