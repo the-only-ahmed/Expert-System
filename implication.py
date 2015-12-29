@@ -1,8 +1,6 @@
 from parser import *
 
-ahmed = [('E', 'Variable'), ('+', 'operator'), ('F', 'Variable')]
-
-def solveRule(rule, essai):
+def solveRule(rule, essai, verbose, undet):
     isImp = False
     leftSide = []
     rightSide = []
@@ -17,10 +15,12 @@ def solveRule(rule, essai):
 
     left = solveSide(leftSide)
     global variables
-    print "\033[92m" + str(variables) + "\033[0m"
-    print "\033[91m" + str(leftSide) + " => " + "\033[95m" + str(left) + "\033[0m"
+    if (verbose):
+        print "\033[91m" + str(leftSide) + " => " + "\033[95m" + str(left) + "\033[0m"
     if left is None:
         if essai == 1:
+            if (verbose):
+                print "supposing that the unknown variables in the leftSide are False"
             #global variables
             tmp = dict(variables)
             leftVars = [item[0] for item in leftSide if item[1] == VAR]
@@ -33,26 +33,32 @@ def solveRule(rule, essai):
                 return False
         else:
             return False
-    if setOtherSide(rightSide, left) is None:
+    if setOtherSide(rightSide, left, verbose, undet) is None:
         return False
     return True
 
-def setOtherSide(sideLst, left):
+def setOtherSide(sideLst, left, verbose, undet):
     unknownLst = [item for item in sideLst if item[1] == VAR and variables[item[0]] == None]
+    if (verbose):
+        print "unknown variables : " + str(unknownLst)
     if len(unknownLst) == 1:
         unknown = unknownLst[0][0]
         val = solveSide(sideLst, left)
+        if (verbose):
+            print str(unknown) + " => " + str(val)
         if unknown in queries:
             queries[unknown].append(val)
-        #else:
-        variables[unknown] = val
+        elif not undet:
+            variables[unknown] = val
         return True
-    else:
-        if left is True:
+    elif len(unknownLst) > 1:
+        if left is not None:
             notLst = []
             no = False
             for x in sideLst:
                 if x[1] == OP and x[0] != '+':
+                    if (verbose):
+                        print "the unknow variables could be true and false"
                     return None
                 elif x[1] == NOT:
                     no = True
@@ -60,16 +66,24 @@ def setOtherSide(sideLst, left):
                     notLst.append(x[0])
                     no = False
             for uk in unknownLst:
-                v = True
+                v = left
                 if uk[0] in notLst:
-                    v = False
+                    v = not left
+                if (verbose):
+                    print str(uk[0]) + " => " + str(v)
                 if uk[0] in queries:
                     queries[uk[0]].append(v)
-                #else:
-                variables[uk[0]] = v
+                elif not undet:
+                    variables[uk[0]] = v
             return True
         else:
+            if (verbose):
+                print "could not find the unknown variables, will recheck later"
             return None
+    else:
+        if (verbose):
+            print "there is no unknown variable in this Side of the rule"
+        return False
 
 def solveSide(*args):
     op = None
@@ -87,6 +101,7 @@ def solveSide(*args):
     try :
         for i in range(len(args)):
             res = None
+            finalRes = None
             pos = 0
             ignore = 0
             for item in sideLst:
@@ -103,6 +118,8 @@ def solveSide(*args):
                     elif op == '|':
                         res = res or subCalc
                     elif op == '^':
+                        if res is True:
+                            finalRes = True
                         res = res ^ subCalc
                     else:
                         res = subCalc
@@ -121,12 +138,16 @@ def solveSide(*args):
                     if op == '+':
                         res = res and v
                     elif op == '|':
+                        if res is True:
+                            finalRes = True
                         res = res or v
                     elif op == '^':
                         res = res ^ v
                     else:
                         res = v
                 pos += 1
+            if finalRes is not None:
+                res = finalRes
             if wantedRes is not None and res == wantedRes:
                 res = supp[i]
                 break

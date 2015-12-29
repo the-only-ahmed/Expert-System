@@ -2,7 +2,7 @@ from parser import *
 from implication import *
 from ifof import *
 
-def solve(variables, rules, queries):
+def solve(variables, rules, queries, verbose, undet):
     ln = len(rules)
     essai = 0
 
@@ -11,18 +11,22 @@ def solve(variables, rules, queries):
             queries[q].append(variables[q])
     while len(rules) > 0:
         delete = []
-        rules = reorganize(rules)
+        rules = reorganize(rules, verbose)
         for rule in rules:
+            if (verbose):
+                print "rule : " + str(rule)
+                print "variables : " + "\033[92m" + str(variables) + "\033[0m"
+                print "queries" + "\033[92m" + str(queries) + "\033[0m"
             if len([item for item in rule if item[1] == IMP]) > 0:
-                if solveRule(rule, essai):
+                if solveRule(rule, essai, verbose, undet):
                     delete.append(rule)
                     essai = 0
             elif len([item for item in rule if item[1] == IFOF]) > 0:
-                if solveIfof(rule):
+                if solveIfof(rule, verbose, undet):
                     essai = 0
                     delete.append(rule)
             else:
-                print IFOF + " is currently not available"
+                print "ERROR"
                 exit()
         for d in delete:
             if d in rules:
@@ -34,27 +38,46 @@ def solve(variables, rules, queries):
         elif essai > 0:
             essai = 0
         ln = len(rules)
-    # # for q in queries:
-    # #     if queries[q] is None:
-    # #         queries[q] = [False]
-    queries = setQueries()
+#    for q in queries:
+#        if queries[q] is None:
+#            queries[q] = [False]
+    #print queries
     # queries = checkQuery()
-    print queries
+    printResult(undet)
 
-def setQueries():
-    result = {}
+def printResult(undet):
+    queries = setQueries(undet)
     for q in queries:
-        result[q] = queries[q][0]
-    return result
-
-def checkQuery():
-    result = {}
-    for q in queries:
-        if len(list(set(queries[q]))) > 1 or len(queries[q]) == 0:
-            result[q] = None
+        if queries[q] is None:
+            print '\033[1m' + '\033[93m' + str(q) + "\033[94m is undetermined\033[0m"
+        elif queries[q] is True:
+            print '\033[1m' + '\033[93m' + str(q) + "\033[92m is " + str(queries[q])
         else:
-            result[q] = queries[q][0]
+            print '\033[1m' + '\033[93m' + str(q) + "\033[91m is " + str(queries[q])
+
+def setQueries(undet):
+    result = {}
+    for q in queries:
+        if len(queries[q]) > 0:
+            if len(list(set(queries[q]))) > 1 and undet:
+                result[q] = None
+            else:
+                result[q] = queries[q][0]
+        else:
+            if (undet):
+                result[q] = None
+            else:
+                result[q] = False
     return result
+
+#def checkQuery():
+#    result = {}
+#    for q in queries:
+#        if len(list(set(queries[q]))) > 1 or len(queries[q]) == 0:
+#            result[q] = None
+#        else:
+#            result[q] = queries[q][0]
+#    return result
 
 def getPerc(rule):
     leftSide = []
@@ -68,7 +91,9 @@ def getPerc(rule):
 
     return (known * 100) / len(leftVars)
 
-def reorganize(rules):
+def reorganize(rules, verbose):
+    if verbose:
+        print "sorting rules according to known variables so we can get a better solve of the problem"
     rl = []
     for rule in rules:
         rl.append((rule, getPerc(rule)))

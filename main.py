@@ -20,10 +20,12 @@ def check_fileExistance(path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--colors", help="add colors to shell", nargs=1)
+    parser.add_argument("-v", "--verbose", help="feedback to explain the answer", action="store_true")
+    parser.add_argument("-u", "--undetermined", help="check if variable is undetermined or not", action="store_true")
     parser.add_argument("-f", "--file", help="add configuration file", nargs=1)
     args = parser.parse_args()
     fd = None
+    undet = args.undetermined
     if (args.file != None):
         fd = check_fileExistance(args.file[0])
     else:
@@ -31,7 +33,10 @@ def main():
         exit()
     if fd is not None:
         parse_file(fd)
+    else:
+        print "fd is None"
+        exit()
 
-    solve(variables, rules, queries)
+    solve(variables, rules, queries, args.verbose, undet)
 
 main()
