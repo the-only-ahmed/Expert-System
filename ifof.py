@@ -28,19 +28,3 @@ def solveIfof(rule, verbose, undet):
         if setOtherSide(rightSide, left, verbose, undet) is None:
             return False
     return True
-
-    #
-    # if left is None:
-    #     global variables
-    #     tmp = dict(variables)
-    #     leftVars = [item[0] for item in leftSide if item[1] == VAR]
-    #     for v in leftVars:
-    #         if variables[v] is None:
-    #             variables[v] = False
-    #     left = solveSide(leftSide)
-    #     variables = dict(tmp)
-    #     if left is None:
-    #         return False
-    # if setOtherSide(rightSide, left, essai) is None:
-    #     return False
-    # return True

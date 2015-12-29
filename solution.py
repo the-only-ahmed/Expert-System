@@ -2,7 +2,7 @@ from parser import *
 from implication import *
 from ifof import *
 
-def solve(variables, rules, queries, verbose, undet):
+def solve(rules, verbose, undet):
     ln = len(rules)
     essai = 0
 
@@ -38,11 +38,6 @@ def solve(variables, rules, queries, verbose, undet):
         elif essai > 0:
             essai = 0
         ln = len(rules)
-#    for q in queries:
-#        if queries[q] is None:
-#            queries[q] = [False]
-    #print queries
-    # queries = checkQuery()
     printResult(undet)
 
 def printResult(undet):
@@ -51,9 +46,9 @@ def printResult(undet):
         if queries[q] is None:
             print '\033[1m' + '\033[93m' + str(q) + "\033[94m is undetermined\033[0m"
         elif queries[q] is True:
-            print '\033[1m' + '\033[93m' + str(q) + "\033[92m is " + str(queries[q])
+            print '\033[1m' + '\033[93m' + str(q) + "\033[92m is " + str(queries[q]) + "\033[0m"
         else:
-            print '\033[1m' + '\033[93m' + str(q) + "\033[91m is " + str(queries[q])
+            print '\033[1m' + '\033[93m' + str(q) + "\033[91m is " + str(queries[q]) + "\033[0m"
 
 def setQueries(undet):
     result = {}
@@ -69,15 +64,6 @@ def setQueries(undet):
             else:
                 result[q] = False
     return result
-
-#def checkQuery():
-#    result = {}
-#    for q in queries:
-#        if len(list(set(queries[q]))) > 1 or len(queries[q]) == 0:
-#            result[q] = None
-#        else:
-#            result[q] = queries[q][0]
-#    return result
 
 def getPerc(rule):
     leftSide = []
